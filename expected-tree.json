@@ -14,7 +14,8 @@
     "first_observed_scan_id": "3214462",
     "first_observed_scan_ctx": "3db3b0c1f79a4c6ab55de75211ec0b9c",
     "first_observed_date": "2026-05-25",
-    "jira_ticket": "TBD — file under SCA project. Draft bug report at docs/MEND_BUG_ANT_LOADERID.md."
+    "jira_ticket": "SCA-5597",
+    "jira_url": "https://mend-io.atlassian.net/browse/SCA-5597"
   },
   "_patterns": [
     "dynamic-revision",

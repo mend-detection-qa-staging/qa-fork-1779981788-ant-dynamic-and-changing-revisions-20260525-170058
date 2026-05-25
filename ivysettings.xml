@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  ivysettings.xml — ant-dynamic-and-changing-revisions probe
+
+  Standard single-resolver setup pointing at Maven Central (ibiblio).
+  Used for Mode-1 (Ivy resolution) pipeline runs only.
+
+  For the dynamic-revision dep (rev="3.+"):
+    Ivy sends the range query to Maven Central's metadata endpoint.
+    Maven Central returns the version list; Ivy picks the highest 3.x.
+
+  For the changing-revision dep (rev="latest.integration" changing="true"):
+    Ivy queries Maven Central for the latest published release on this
+    coord (there are no true integration/SNAPSHOT artifacts on Central).
+    With changing="true", Ivy checks Last-Modified and re-resolves even
+    if a locally cached artifact exists.
+
+  checkmodified="true" on the ibiblio resolver enables the cache
+  re-validation path for changing artifacts.
+-->
+<ivysettings>
+
+    <!--
+      Default resolver: Maven Central via ibiblio.
+      m2compatible="true" uses Maven 2 repository layout (group/artifact/version).
+    -->
+    <settings defaultResolver="central"/>
+
+    <resolvers>
+        <ibiblio name="central"
+                 m2compatible="true"
+                 root="https://repo1.maven.org/maven2/"
+                 checkmodified="true"
+                 changingPattern=".*-SNAPSHOT"
+                 changingMatcher="glob"/>
+    </resolvers>
+
+    <!--
+      Default conflict manager: latest-revision (Ivy default).
+      Dynamic revision "3.+" resolves to the highest 3.x available.
+      No custom conflict manager needed for this probe.
+    -->
+    <conflict-managers>
+        <latest-revision-cm name="latest-revision"/>
+    </conflict-managers>
+
+</ivysettings>

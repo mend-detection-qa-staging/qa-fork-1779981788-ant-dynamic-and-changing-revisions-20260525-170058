@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  build.xml — ant-dynamic-and-changing-revisions probe
+  Project #8 (P1) from ANT-COVERAGE-PLAN.md.
+  Catalog IDs: #11 (dynamic-revision), #23 (changing-revision).
+
+  INTENT (Mode-1 / aspirational):
+    <dependency org="org.apache.commons" name="commons-lang3" rev="3.+"
+                conf="compile->default"/>
+    Ivy would resolve rev="3.+" to the latest 3.x release at resolve-time.
+    Mend MUST emit a concrete version (e.g. 3.14.0), NOT the expression "3.+".
+
+    <dependency org="org.apache.commons" name="commons-text" rev="latest.integration"
+                changing="true" conf="runtime->default"/>
+    changing="true" tells Ivy to re-check the artifact even if it has been cached
+    (SNAPSHOT-equivalent semantics). Mend MUST record the concrete resolved version,
+    not the string "latest.integration".
+
+  MODE-3 REALITY:
+    The bolt-4 SCM scanner does NOT invoke Ivy (Mode 1). It path-scans lib/ for
+    binary artifacts (Mode 3). JARs have been pre-resolved and committed into lib/
+    at the concrete versions that those dynamic expressions would produce today:
+      - commons-lang3-3.14.0.jar   (dynamic rev="3.+" resolves to 3.14.0)
+      - commons-text-1.10.0.jar    (changing rev="latest.integration" stable sub = 1.10.0)
+      - commons-codec-1.16.1.jar   (transitive of commons-text)
+      - slf4j-api-2.0.16.jar       (transitive of commons-text)
+
+  REGRESSION SIGNAL:
+    Mend must report version="3.14.0" for commons-lang3 (NOT "3.+").
+    Mend must report version="1.10.0" for commons-text (NOT "latest.integration").
+    expected_dependency_pairs in autotest_config.json enforces this per-artifact.
+-->
+<project name="ant-dynamic-and-changing-revisions" default="resolve" basedir=".">
+
+    <!-- Ivy settings: load from ivysettings.xml if running in Mode-1 pipeline. -->
+    <taskdef resource="org/apache/ivy/ant/antlib.xml"
+             uri="antlib:org.apache.ivy.ant"
+             classpathref="ivy.lib.path"
+             loaderid="ivy.loader"
+             onerror="ignore"/>
+
+    <property name="lib.dir" value="${basedir}/lib"/>
+    <property name="ivy.settings.file" value="${basedir}/ivysettings.xml"/>
+
+    <!--
+      classpath for Ivy-task loading (Mode-1 pipeline only).
+      Expects ivy-2.5.2.jar on ANT_HOME/lib or provided via ivyjar.path property.
+    -->
+    <path id="ivy.lib.path">
+        <fileset dir="${user.home}/.ant/lib" includes="ivy*.jar" erroronmissingdir="false"/>
+        <pathelement path="${ivyjar.path}" erroronmissingdir="false"/>
+    </path>
+
+    <!-- Mode-1: Ivy resolution target (aspirational — does not run in SCM scan). -->
+    <target name="ivy-resolve"
+            description="Resolve deps via Ivy (Mode-1 — requires ivy.jar on classpath)">
+        <ivy:settings xmlns:ivy="antlib:org.apache.ivy.ant" file="${ivy.settings.file}"/>
+        <ivy:resolve  xmlns:ivy="antlib:org.apache.ivy.ant" file="${basedir}/ivy.xml"
+                      conf="compile,runtime" log="quiet"/>
+        <ivy:retrieve xmlns:ivy="antlib:org.apache.ivy.ant"
+                      pattern="${lib.dir}/[artifact]-[revision].[ext]"
+                      conf="compile,runtime" sync="false"/>
+    </target>
+
+    <!-- Mode-3 bootstrap: lib/ is already populated; just register as a classpath. -->
+    <path id="lib.cp">
+        <fileset dir="${lib.dir}" includes="*.jar"/>
+    </path>
+
+    <!-- Default target: print lib contents (verifies pre-committed JARs are visible). -->
+    <target name="resolve"
+            description="List pre-committed JARs (Mode-3 path scan target)">
+        <echo message="lib/ contents (pre-committed for Mode-3 scan):"/>
+        <pathconvert property="lib.list" refid="lib.cp" pathsep="${line.separator}  "/>
+        <echo message="  ${lib.list}"/>
+    </target>
+
+</project>

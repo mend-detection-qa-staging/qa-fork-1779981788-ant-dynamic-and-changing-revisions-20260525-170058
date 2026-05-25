@@ -1,0 +1,87 @@
+{
+  "_schema_version": "1.0",
+  "_probe_id": "ant-dynamic-and-changing-revisions-20260525-170058",
+  "_pm": "ant",
+  "_pm_version_tested": "ivy-2.5.x",
+  "_scanner_mode": "mode-3-default-path-scan",
+  "_patterns": [
+    "dynamic-revision",
+    "changing-revision"
+  ],
+  "_catalog_ids": ["#11", "#23"],
+  "_generated": "2026-05-25",
+
+  "_mode_3_notes": [
+    "The bolt-4 SCM scanner does NOT invoke Mode-1 Ivy resolution.",
+    "It falls through to Mode-3 default path scan: SHA1 fingerprints of binary files (jar/war/dll/etc).",
+    "Each lib/*.jar appears as a flat direct dependency with no transitive structure.",
+    "Dynamic-revision (rev='3.+') and changing-revision (rev='latest.integration' changing='true') semantics are exercised at lib-population time: JARs were pre-resolved to their concrete versions.",
+    "The probe validates Mend's binary fingerprinting + concrete version extraction — NOT Ivy resolution itself.",
+    "REGRESSION SIGNAL: Mend must emit version='3.14.0' for commons-lang3 (not '3.+') and version='1.10.0' for commons-text (not 'latest.integration').",
+    "Mode-1 testing of dynamic/changing semantics requires pipeline-mode 'mend ua -c whitesource.config', not SCM integration."
+  ],
+
+  "schema_version": "1.0",
+  "pm": "ant",
+  "source_file": "build.xml",
+  "root": {
+    "name": "ant-dynamic-and-changing-revisions-20260525",
+    "version": "0.1.0",
+    "dependencies": [
+      "commons-lang3-3.14.0.jar",
+      "commons-text-1.10.0.jar",
+      "commons-codec-1.16.1.jar",
+      "slf4j-api-2.0.16.jar"
+    ]
+  },
+  "packages": {
+    "commons-lang3-3.14.0.jar": {
+      "version": "3.14.0",
+      "_version_note": "Concrete resolution of dynamic rev='3.+'. Mend MUST emit '3.14.0', NOT '3.+'.",
+      "_dynamic_intent": "rev='3.+' in ivy.xml — Ivy latest-3.x selector",
+      "source": "local",
+      "source_detail": {"path": "lib/commons-lang3-3.14.0.jar"},
+      "group": "main",
+      "hashes": ["1ed471194b02f2c6cb734a0cd6f6f107c673afae"],
+      "dependencies": []
+    },
+    "commons-text-1.10.0.jar": {
+      "version": "1.10.0",
+      "_version_note": "Concrete resolution of changing rev='latest.integration' changing='true'. Mend MUST emit '1.10.0', NOT 'latest.integration'.",
+      "_changing_intent": "rev='latest.integration' changing='true' in ivy.xml — SNAPSHOT-equivalent selector",
+      "source": "local",
+      "source_detail": {"path": "lib/commons-text-1.10.0.jar"},
+      "group": "main",
+      "hashes": ["3363381aef8cef2dbc1023b3e3a9433b08b64e01"],
+      "dependencies": []
+    },
+    "commons-codec-1.16.1.jar": {
+      "version": "1.16.1",
+      "_version_note": "Transitive of commons-text (runtime dependency).",
+      "source": "local",
+      "source_detail": {"path": "lib/commons-codec-1.16.1.jar"},
+      "group": "main",
+      "hashes": ["47bd4d333fba53406f6c6c51884ddbca435c8862"],
+      "dependencies": []
+    },
+    "slf4j-api-2.0.16.jar": {
+      "version": "2.0.16",
+      "_version_note": "Transitive of commons-text (runtime dependency).",
+      "source": "local",
+      "source_detail": {"path": "lib/slf4j-api-2.0.16.jar"},
+      "group": "main",
+      "hashes": ["0172931663a09a1fa515567af5fbef00897d3c04"],
+      "dependencies": []
+    }
+  },
+  "project_metadata": {
+    "groups": ["main"]
+  },
+  "warnings": [
+    "Probe pivoted from Mode-1 (Ivy resolution) to Mode-3 (binary path scan) because the bolt-4 SCM scanner does not honor ant.ivyResolveDependencies=true from repo-root whitesource.config.",
+    "Dynamic revision (catalog #11): rev='3.+' on commons-lang3. Pre-committed JAR is 3.14.0 — the concrete latest-3.x on Maven Central at generation time (2026-05-25). If Mend emits '3.+' instead of '3.14.0', expected_dependency_pairs assertion will fail — this is the intended regression signal.",
+    "Changing revision (catalog #23): rev='latest.integration' changing='true' on commons-text. Pre-committed JAR is 1.10.0 — the stable substitute for what SNAPSHOT-equivalent resolution would produce. If Mend emits 'latest.integration' instead of '1.10.0', expected_dependency_pairs assertion will fail.",
+    "All four JARs in lib/ are committed; Mode-3 treats all as flat direct deps with no transitive tree structure.",
+    "SHA1 values verified against Maven Central published checksums."
+  ]
+}

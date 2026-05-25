@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  ivy.xml — ant-dynamic-and-changing-revisions probe
+  Catalog IDs: #11 (dynamic-revision), #23 (changing-revision)
+
+  Two non-pinned-version mechanisms:
+
+  1. DYNAMIC REVISION (#11):
+       rev="3.+"  on commons-lang3.
+       Ivy resolves the "latest matching" concrete version at resolve-time.
+       The "+" wildcard means "any 3.x micro version".
+       Expected concrete resolution: 3.14.0 (latest stable 3.x on Maven Central).
+       Mend MUST emit version="3.14.0", not "3.+".
+
+  2. CHANGING REVISION (#23):
+       rev="latest.integration" changing="true"  on commons-text.
+       "latest.integration" selects the most recent integration build (SNAPSHOT-equivalent).
+       changing="true" forces Ivy to bypass its cache and re-download on every resolve
+       (because content at the same coordinates may change — true SNAPSHOTs).
+       For Maven Central (release-only) this resolves to the latest stable release.
+       Expected concrete resolution: 1.10.0
+       Mend MUST emit version="1.10.0", not "latest.integration".
+
+  Note: In Mode-3 (SCM scan), Ivy resolution does not run. The expected concrete versions
+  are those of the pre-committed JARs in lib/. The ivy.xml documents the original dynamic
+  intent and is valid for Mode-1 pipeline-mode scanning.
+-->
+<ivy-module version="2.0"
+            xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+            xsi:noNamespaceSchemaLocation="http://ant.apache.org/ivy/schemas/ivy.xsd">
+
+    <info organisation="mend-detection-qa"
+          module="ant-dynamic-and-changing-revisions"
+          revision="0.1.0"
+          status="integration"/>
+
+    <configurations>
+        <!-- compile: direct build-time dependencies -->
+        <conf name="compile"  description="Compile classpath"/>
+        <!-- runtime: runtime-only dependencies (extends compile) -->
+        <conf name="runtime"  extends="compile"
+              description="Runtime classpath — includes compile deps"/>
+        <!-- default: published artifact configuration -->
+        <conf name="default"  extends="runtime"
+              description="Default (published) configuration"/>
+    </configurations>
+
+    <dependencies>
+
+        <!--
+          DYNAMIC REVISION: rev="3.+"
+          The "+" pattern is an Ivy dynamic revision selector:
+            - Matches any version in the 3.x line.
+            - Ivy resolves to the highest 3.x version available in the configured
+              resolvers at resolve-time.
+          Expected winner: org.apache.commons:commons-lang3:3.14.0
+          commons-lang3 has no compile-scope transitive deps.
+        -->
+        <dependency org="org.apache.commons"
+                    name="commons-lang3"
+                    rev="3.+"
+                    conf="compile->default"
+                    transitive="true"/>
+
+        <!--
+          CHANGING REVISION: rev="latest.integration" changing="true"
+          "latest.integration" selects the highest version with status=integration
+          (i.e. SNAPSHOTs or the highest available release on Maven Central).
+          changing="true" disables Ivy's TTL cache — content at these coordinates
+          may change between resolves (true SNAPSHOT semantics).
+          Expected winner: org.apache.commons:commons-text:1.10.0
+          commons-text has compile-scope dep: commons-lang3 (satisfied by the
+          dynamic-revision dep above) and runtime dep: slf4j-api.
+        -->
+        <dependency org="org.apache.commons"
+                    name="commons-text"
+                    rev="latest.integration"
+                    changing="true"
+                    conf="runtime->default"
+                    transitive="true"/>
+
+    </dependencies>
+
+</ivy-module>

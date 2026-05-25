@@ -1,0 +1,8 @@
+{
+  "scanSettings": {
+    "configMode": "LOCAL",
+    "versioning": {
+      "java": "17"
+    }
+  }
+}

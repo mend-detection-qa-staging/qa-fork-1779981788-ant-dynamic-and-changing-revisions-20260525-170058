@@ -1,0 +1,135 @@
+{
+  "_comment": "Autotest config for ant-dynamic-and-changing-revisions-20260525 — Mode-3 path-scan probe. The bolt-4 SCM scanner does NOT do Ivy resolution; it path-scans lib/ for binary artifacts. We pre-resolved and committed 4 JARs at their concrete versions so the scanner has something to fingerprint. REGRESSION SIGNAL: expected_dependency_pairs enforces that Mend emits the concrete version (3.14.0, 1.10.0), NOT the dynamic expression ('3.+' or 'latest.integration').",
+  "_probe_id": "ant-dynamic-and-changing-revisions-20260525-170058",
+  "_coverage_plan": "ANT-COVERAGE-PLAN.md Project #8 (P1) — dynamic-revision + changing-revision",
+  "_catalog_ids": ["#11", "#23"],
+  "_scanner_mode": "mode-3-default-path-scan",
+  "_mode_note": "Mode-1 Ivy resolution is not supported by bolt-4 SCM scanner. For Mode-1 testing of dynamic/changing semantics, use pipeline-mode 'mend ua' against the same repo.",
+  "description": "Autotest configuration file for dependency tree detection validation",
+  "version": 1.8,
+  "base_config": {
+    "branch": null,
+
+    "validate_scan_output": true,
+    "scan_output": {
+      "security_scan_report_conclusion": "success",
+      "total_libs_scanned": {"gte": 4},
+      "expected_messages": []
+    },
+
+    "validate_dependency_tree": true,
+    "dependency_tree": {
+      "check_dependency_tree_detection_status": true,
+      "check_update_request_sca_results": true,
+      "check_system_paths": false,
+
+      "expected_total_dependencies_number": {"gte": 4},
+      "expected_direct_dependencies_number": {"gte": 4},
+      "expected_transitive_dependencies_number": {"gte": 0},
+
+      "direct_dependencies_names_list": {
+        "contains": [
+          "commons-lang3-3.14.0.jar",
+          "commons-text-1.10.0.jar",
+          "commons-codec-1.16.1.jar",
+          "slf4j-api-2.0.16.jar"
+        ]
+      },
+
+      "transitive_dependencies_names_list": {
+        "contains": []
+      },
+
+      "expected_package_managers": {
+        "contains": ["ant"]
+      },
+
+      "expected_dependency_pairs": [
+        {
+          "artifactId": "commons-lang3-3.14.0.jar",
+          "version": "3.14.0",
+          "_note": "Regression signal #11 (dynamic-revision): Mend MUST emit concrete '3.14.0', not the dynamic expression '3.+'. If this assertion fails, Mend is leaking the dynamic expression into its output."
+        },
+        {
+          "artifactId": "commons-text-1.10.0.jar",
+          "version": "1.10.0",
+          "_note": "Regression signal #23 (changing-revision): Mend MUST emit concrete '1.10.0', not 'latest.integration'. If this assertion fails, Mend is emitting the dynamic selector instead of the resolved version."
+        },
+        {
+          "artifactId": "commons-codec-1.16.1.jar",
+          "version": "1.16.1"
+        },
+        {
+          "artifactId": "slf4j-api-2.0.16.jar",
+          "version": "2.0.16"
+        }
+      ],
+
+      "validate_agent_versions": false,
+      "expected_agent_version": "",
+      "expected_plugin_version": "",
+      "validate_mend_tags": false,
+
+      "validate_checksums": true,
+      "checksums_config": {
+        "check_sha1_not_empty": true,
+        "check_sha1_format": true,
+        "check_sha1_consistency": true,
+        "check_checksums_by_formula": false,
+        "expected_dependency_checksums": [
+          {
+            "artifactId": "commons-lang3-3.14.0.jar",
+            "version": "3.14.0",
+            "sha1": "1ed471194b02f2c6cb734a0cd6f6f107c673afae",
+            "_note": "dynamic-revision concrete SHA1 — verified against Maven Central"
+          },
+          {
+            "artifactId": "commons-text-1.10.0.jar",
+            "version": "1.10.0",
+            "sha1": "3363381aef8cef2dbc1023b3e3a9433b08b64e01",
+            "_note": "changing-revision stable-substitute SHA1 — verified against Maven Central"
+          },
+          {
+            "artifactId": "commons-codec-1.16.1.jar",
+            "version": "1.16.1",
+            "sha1": "47bd4d333fba53406f6c6c51884ddbca435c8862"
+          },
+          {
+            "artifactId": "slf4j-api-2.0.16.jar",
+            "version": "2.0.16",
+            "sha1": "0172931663a09a1fa515567af5fbef00897d3c04"
+          }
+        ]
+      }
+    },
+
+    "validate_vulnerabilities_table": false,
+    "vulnerabilities_table": {
+      "check_vulnerabilities_table_structure": true,
+      "expected_total_vulnerabilities_number": {"gte": 0},
+      "vulnerabilities_ids_list": {"contains": []},
+      "vulnerabilities_names_list": {"contains": []}
+    },
+
+    "validate_scanner_logs": false,
+    "logs": {
+      "check_scanner_logs": true,
+      "detect_secrets": false,
+      "check_external_logs": false,
+      "expected_log_lines": []
+    },
+
+    "validate_reachability": false,
+    "reachability": {
+      "check_reachability_status": false
+    },
+
+    "validate_project_contributors": false,
+    "contributors": {
+      "check_contributors_structure": true,
+      "expected_contributors": [],
+      "expected_min_commits": {"gte": 1},
+      "expected_total_contributors": {}
+    }
+  }
+}

@@ -1,0 +1,21 @@
+# Ivy resolution cache
+.ivy2/
+ivy-cache/
+ivy2-cache/
+~/.ivy2/
+
+# Ant build output
+build/
+dist/
+
+# NOTE: lib/ is normally ignored (Ivy resolves into it).
+# This probe pivots to Mode-3 path scanning so curated JARs are
+# committed into lib/. Do NOT add lib/ here.
+
+# Ivy resolution reports
+ivy-*.xml
+resolution-cache/
+
+# OS metadata
+.DS_Store
+Thumbs.db

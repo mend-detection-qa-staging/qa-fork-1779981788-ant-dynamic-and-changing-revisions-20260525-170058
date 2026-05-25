@@ -33,10 +33,15 @@
 <project name="ant-dynamic-and-changing-revisions" default="resolve" basedir=".">
 
     <!-- Ivy settings: load from ivysettings.xml if running in Mode-1 pipeline. -->
+    <!--
+      loaderid="..." was removed: the UA's bundled in-process Ant library
+      does not recognise that attribute and bombs in customConfigureProject,
+      which kills the scan before Mode-1/2/3 can start. Standalone Ant 1.8+
+      accepts it, but we don't need classloader isolation here.
+    -->
     <taskdef resource="org/apache/ivy/ant/antlib.xml"
              uri="antlib:org.apache.ivy.ant"
              classpathref="ivy.lib.path"
-             loaderid="ivy.loader"
              onerror="ignore"/>
 
     <property name="lib.dir" value="${basedir}/lib"/>

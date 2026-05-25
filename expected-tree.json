@@ -3,7 +3,19 @@
   "_probe_id": "ant-dynamic-and-changing-revisions-20260525-170058",
   "_pm": "ant",
   "_pm_version_tested": "ivy-2.5.x",
-  "_scanner_mode": "mode-3-default-path-scan",
+  "_scanner_mode": "mode-3-default-path-scan-BLOCKED-BY-MEND-DEFECT",
+  "_known_mend_defect": {
+    "summary": "UA's bundled in-process Apache Ant library does not recognise the `loaderid` attribute on <taskdef>. The attribute was added in Ant 1.8 (2010). The Ant version bundled in the bolt-4 SCM scanner pre-dates that.",
+    "scan_outcome": "totalFail.RESOLUTION=1, zero dependencies detected",
+    "error_message": "taskdef doesn't support the \"loaderid\" attribute",
+    "stack_anchor": "org.whitesource.agent.dependency.resolver.ant.AntDependencyResolver.customConfigureProject(AntDependencyResolver.java:556)",
+    "customer_impact": "Any customer with build.xml using Ant 1.8+ syntax (specifically <taskdef loaderid=...>) cannot be scanned via SCM integration. No documented workaround: `ant` is not in install-tool's supported tool list, so scanSettings.versioning.ant is a no-op. The UA loads Ant as an in-process library, not a CLI binary, so no ant.environmentPath or similar knob exists. Customers must downgrade their build.xml syntax — which may not be feasible.",
+    "first_observed_agent_version": "26.4.2",
+    "first_observed_scan_id": "3214462",
+    "first_observed_scan_ctx": "3db3b0c1f79a4c6ab55de75211ec0b9c",
+    "first_observed_date": "2026-05-25",
+    "jira_ticket": "TBD — file under SCA project. Draft bug report at docs/MEND_BUG_ANT_LOADERID.md."
+  },
   "_patterns": [
     "dynamic-revision",
     "changing-revision"

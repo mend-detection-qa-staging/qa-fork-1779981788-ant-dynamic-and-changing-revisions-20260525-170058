@@ -34,14 +34,29 @@
 
     <!-- Ivy settings: load from ivysettings.xml if running in Mode-1 pipeline. -->
     <!--
-      loaderid="..." was removed: the UA's bundled in-process Ant library
-      does not recognise that attribute and bombs in customConfigureProject,
-      which kills the scan before Mode-1/2/3 can start. Standalone Ant 1.8+
-      accepts it, but we don't need classloader isolation here.
+      KNOWN MEND DEFECT (capture intentionally — do NOT remove loaderid):
+      The bolt-4 SCM scanner uses an in-process Apache Ant library that
+      does not recognise the loaderid attribute on <taskdef>. loaderid was
+      added in Ant 1.8.0 (2010). When present, the UA's customConfigureProject
+      throws UnsupportedAttributeException and the scan reports
+      totalFail.RESOLUTION=1 with zero detected dependencies.
+
+      Customers with modern build.xml files have NO documented workaround:
+      - `ant` is not in install-tool's supported tool list, so .whitesource
+        scanSettings.versioning.ant is a no-op.
+      - The UA loads Ant as a library, not as an external CLI binary, so
+        there is no ant.environmentPath or similar knob to point at a newer
+        Ant installation.
+      - The bundled Ant version is fixed when Mend builds the UA.
+
+      This probe captures the defect as a regression signal. See README.md
+      "Known Mend defect" section and the bug report under
+      docs/bugs/ant-bundled-version-loaderid.md (or the Jira ticket once filed).
     -->
     <taskdef resource="org/apache/ivy/ant/antlib.xml"
              uri="antlib:org.apache.ivy.ant"
              classpathref="ivy.lib.path"
+             loaderid="ivy.loader"
              onerror="ignore"/>
 
     <property name="lib.dir" value="${basedir}/lib"/>

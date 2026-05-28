@@ -4,5 +4,13 @@
     "versioning": {
       "java": "17"
     }
+  },
+  "scanSettingsSAST": {
+    "enableScan": false
+  },
+  "remediateSettings": {
+    "workflowRules": {
+      "enabled": false
+    }
   }
 }
